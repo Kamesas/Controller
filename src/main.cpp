@@ -3,8 +3,8 @@
 #include "ControllerManager.h"
 #include "config.h"
 
-// Define the pin for the lights. This is the single source of truth.
-const int LIGHTS_PIN = 4;
+// Define the pin for the headlights. This is the single source of truth.
+const int HEAD_LIGHTS_PIN = 4;
 
 void setup() {
     Serial.begin(115200);
@@ -12,8 +12,8 @@ void setup() {
     const uint8_t* addr = BP32.localBdAddress();
     Serial.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
 
-    pinMode(LIGHTS_PIN, OUTPUT);
-    digitalWrite(LIGHTS_PIN, LOW); // Start with the light off
+    pinMode(HEAD_LIGHTS_PIN, OUTPUT);
+    digitalWrite(HEAD_LIGHTS_PIN, LOW); // Start with the light off
 
     // Setup the Bluepad32 callbacks
     BP32.setup(&onConnectedController, &onDisconnectedController);
