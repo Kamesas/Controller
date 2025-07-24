@@ -8,16 +8,49 @@ void processGamepad(ControllerPtr ctl) {
     // not the implementation of how logging is done.
     logGamepadOnStateChange(ctl);
 
-    // --- Button-specific actions ---
+    // --- Button Y ---
     static bool headlights = false;
-    bool currentButtonState = ctl->buttons() & 0x0008;
-    static bool prevButtonState = false;
-    if (currentButtonState && !prevButtonState) {
+    bool btnY = ctl->buttons() & 0x0008;
+    static bool btnYPrevState = false;
+    if (btnY && !btnYPrevState) {
         headlights = !headlights;
         digitalWrite(HEAD_LIGHTS_PIN, headlights ? HIGH : LOW);
-        Serial.printf("Button toggled - LED %s\n", headlights ? "ON" : "OFF");
+        Serial.printf("HEAD_LIGHTS_PIN %s\n", headlights ? "ON" : "OFF");
     }
-    prevButtonState = currentButtonState;
+    btnYPrevState = btnY;
+
+    // --- Button Y ---
+    static bool breakLights = false;
+    bool btnA = ctl->buttons() & 0x0001;
+    static bool btnAPrevState = false;
+    if (btnA && !btnAPrevState) {
+        breakLights = !breakLights;
+        digitalWrite(BREAK_LIGHTS_PIN, breakLights ? HIGH : LOW);
+        Serial.printf("BREAK_LIGHTS_PIN %s\n", breakLights ? "ON" : "OFF");
+    }
+    btnAPrevState = btnA;
+
+    // --- Button L1 ---
+    static bool leftTernLights = false;
+    bool btnL1 = ctl->buttons() &  0x0010;
+    static bool btnL1PrevState = false;
+    if (btnL1 && !btnL1PrevState) {
+        leftTernLights = !leftTernLights;
+        digitalWrite(BREAK_LIGHTS_PIN, leftTernLights ? HIGH : LOW);
+        Serial.printf("BREAK_LIGHTS_PIN %s\n", leftTernLights ? "ON" : "OFF");
+    }
+    btnL1PrevState = btnL1;
+
+    // --- Button R2 ---
+    static bool rightTernLights = false;
+    bool btnR1 = ctl->buttons() &  0x0020;
+    static bool btnR1PrevState = false;
+    if (btnR1 && !btnR1PrevState) {
+        rightTernLights = !rightTernLights;
+        digitalWrite(BREAK_LIGHTS_PIN, rightTernLights ? HIGH : LOW);
+        Serial.printf("BREAK_LIGHTS_PIN %s\n", rightTernLights ? "ON" : "OFF");
+    }
+    btnR1PrevState = btnR1;
 
     // Other button examples
     if (ctl->a()) {
