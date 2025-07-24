@@ -24,26 +24,55 @@ void processGamepad(ControllerPtr ctl) {
     digitalWrite(BREAK_LIGHTS_PIN, btnA ? HIGH : LOW);
 
     // --- Button L1 ---
-    static bool leftTernLights = false;
-    bool btnL1 = ctl->buttons() &  0x0010;
+    static bool leftTurnBlinking = false;
+    static unsigned long lastBlinkTimeL = 0;
+    static bool leftLedState = LOW;
+    const int blinkInterval = 150; // 150ms interval for blinking
+
+    bool btnL1 = ctl->buttons() & 0x0010;
     static bool btnL1PrevState = false;
+
     if (btnL1 && !btnL1PrevState) {
-        leftTernLights = !leftTernLights;
-        digitalWrite(LEFT_TURN_PIN, leftTernLights ? HIGH : LOW);
-        Serial.printf("LEFT_TURN_PIN %s\n", leftTernLights ? "ON" : "OFF");
+        leftTurnBlinking = !leftTurnBlinking;
+        if (!leftTurnBlinking) {
+            digitalWrite(LEFT_TURN_PIN, LOW); // Turn off LED when blinking is disabled
+        }
     }
     btnL1PrevState = btnL1;
 
-    // --- Button R2 ---
-    static bool rightTernLights = false;
-    bool btnR1 = ctl->buttons() &  0x0020;
+    if (leftTurnBlinking) {
+        unsigned long currentTime = millis();
+        if (currentTime - lastBlinkTimeL >= blinkInterval) {
+            lastBlinkTimeL = currentTime;
+            leftLedState = !leftLedState;
+            digitalWrite(LEFT_TURN_PIN, leftLedState);
+        }
+    }
+
+    // --- Button R1 ---
+    static bool rightTurnBlinking = false;
+    static unsigned long lastBlinkTimeR = 0;
+    static bool rightLedState = LOW;
+
+    bool btnR1 = ctl->buttons() & 0x0020;
     static bool btnR1PrevState = false;
+
     if (btnR1 && !btnR1PrevState) {
-        rightTernLights = !rightTernLights;
-        digitalWrite(RIGHT_TURN_PIN, rightTernLights ? HIGH : LOW);
-        Serial.printf("RIGHT_TURN_PIN %s\n", rightTernLights ? "ON" : "OFF");
+        rightTurnBlinking = !rightTurnBlinking;
+        if (!rightTurnBlinking) {
+            digitalWrite(RIGHT_TURN_PIN, LOW); // Turn off LED when blinking is disabled
+        }
     }
     btnR1PrevState = btnR1;
+
+    if (rightTurnBlinking) {
+        unsigned long currentTime = millis();
+        if (currentTime - lastBlinkTimeR >= blinkInterval) {
+            lastBlinkTimeR = currentTime;
+            rightLedState = !rightLedState;
+            digitalWrite(RIGHT_TURN_PIN, rightLedState);
+        }
+    }
 
     // Other button examples
     if (ctl->a()) {
