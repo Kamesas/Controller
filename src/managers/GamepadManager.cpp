@@ -19,16 +19,9 @@ void processGamepad(ControllerPtr ctl) {
     }
     btnYPrevState = btnY;
 
-    // --- Button Y ---
-    static bool breakLights = false;
+    // --- Button A ---
     bool btnA = ctl->buttons() & 0x0001;
-    static bool btnAPrevState = false;
-    if (btnA && !btnAPrevState) {
-        breakLights = !breakLights;
-        digitalWrite(BREAK_LIGHTS_PIN, breakLights ? HIGH : LOW);
-        Serial.printf("BREAK_LIGHTS_PIN %s\n", breakLights ? "ON" : "OFF");
-    }
-    btnAPrevState = btnA;
+    digitalWrite(BREAK_LIGHTS_PIN, btnA ? HIGH : LOW);
 
     // --- Button L1 ---
     static bool leftTernLights = false;
@@ -36,8 +29,8 @@ void processGamepad(ControllerPtr ctl) {
     static bool btnL1PrevState = false;
     if (btnL1 && !btnL1PrevState) {
         leftTernLights = !leftTernLights;
-        digitalWrite(BREAK_LIGHTS_PIN, leftTernLights ? HIGH : LOW);
-        Serial.printf("BREAK_LIGHTS_PIN %s\n", leftTernLights ? "ON" : "OFF");
+        digitalWrite(LEFT_TURN_PIN, leftTernLights ? HIGH : LOW);
+        Serial.printf("LEFT_TURN_PIN %s\n", leftTernLights ? "ON" : "OFF");
     }
     btnL1PrevState = btnL1;
 
@@ -47,8 +40,8 @@ void processGamepad(ControllerPtr ctl) {
     static bool btnR1PrevState = false;
     if (btnR1 && !btnR1PrevState) {
         rightTernLights = !rightTernLights;
-        digitalWrite(BREAK_LIGHTS_PIN, rightTernLights ? HIGH : LOW);
-        Serial.printf("BREAK_LIGHTS_PIN %s\n", rightTernLights ? "ON" : "OFF");
+        digitalWrite(RIGHT_TURN_PIN, rightTernLights ? HIGH : LOW);
+        Serial.printf("RIGHT_TURN_PIN %s\n", rightTernLights ? "ON" : "OFF");
     }
     btnR1PrevState = btnR1;
 
