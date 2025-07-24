@@ -27,7 +27,7 @@ void processGamepad(ControllerPtr ctl) {
     static bool leftTurnBlinking = false;
     static unsigned long lastBlinkTimeL = 0;
     static bool leftLedState = LOW;
-    const int blinkInterval = 150; // 150ms interval for blinking
+    const int blinkInterval = 500; // 150ms interval for blinking
 
     bool btnL1 = ctl->buttons() & 0x0010;
     static bool btnL1PrevState = false;

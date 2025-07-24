@@ -19,7 +19,7 @@ void setup() {
     pinMode(BREAK_LIGHTS_PIN, OUTPUT);
     pinMode(LEFT_TURN_PIN, OUTPUT);
     pinMode(RIGHT_TURN_PIN, OUTPUT);
-    
+
     digitalWrite(HEAD_LIGHTS_PIN, LOW); // Start with the light off
     digitalWrite(BREAK_LIGHTS_PIN, LOW); // Start with the light off
     digitalWrite(LEFT_TURN_PIN, LOW); // Start with the light off
