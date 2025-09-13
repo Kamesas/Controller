@@ -19,10 +19,6 @@ void processGamepad(ControllerPtr ctl) {
     }
     btnYPrevState = btnY;
 
-    // --- Button A ---
-    bool btnA = ctl->buttons() & 0x0001;
-    digitalWrite(BREAK_LIGHTS_PIN, btnA ? HIGH : LOW);
-
     // --- Button L1 ---
     static bool leftTurnBlinking = false;
     static unsigned long lastBlinkTimeL = 0;
@@ -72,26 +68,5 @@ void processGamepad(ControllerPtr ctl) {
             rightLedState = !rightLedState;
             digitalWrite(RIGHT_TURN_PIN, rightLedState);
         }
-    }
-
-    // Other button examples
-    if (ctl->a()) {
-        static int colorIdx = 0;
-        switch (colorIdx % 3) {
-            case 0: ctl->setColorLED(255, 0, 0); break;  // Red
-            case 1: ctl->setColorLED(0, 255, 0); break;  // Green
-            case 2: ctl->setColorLED(0, 0, 255); break;  // Blue
-        }
-        colorIdx++;
-    }
-
-    if (ctl->b()) {
-        static int led = 0;
-        led++;
-        ctl->setPlayerLEDs(led & 0x0f);
-    }
-
-    if (ctl->x()) {
-        ctl->playDualRumble(0, 250, 0x80, 0x40);
     }
 }
