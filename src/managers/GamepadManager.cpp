@@ -1,7 +1,11 @@
 #include "managers/GamepadManager.h"
 #include <Bluepad32.h>
+#include <ESP32Servo.h>
 #include "config.h"
 #include <Arduino.h>
+
+// Steering servo, created and attached in main.cpp.
+extern Servo steerServo;
 
 // Blinking state variables
 volatile bool leftTurnBlinking = false;
@@ -119,46 +123,31 @@ void processGamepad(ControllerPtr ctl) {
     btnR1_prev = btnR1_curr;
 
 
-    // --- Steering (Right Joystick X-axis) ---
-    int steer_axis = ctl->axisRX(); // Right stick X
-    const int STEER_DEADZONE = 60; // Increased deadzone for better straight-line stability
+    // --- Steering (Right Joystick X-axis, servo) ---
+    // Stick position sets a servo angle. An expo curve makes the center gentler,
+    // so small stick moves turn the wheels only a little. Full stick still reaches
+    // full lock. The servo holds the angle, so steering stays smooth.
+    int steer_axis = ctl->axisRX(); // Right stick X, about -512 (left) to 512 (right)
+    const int STEER_DEADZONE = 60;  // Snap to center when the stick is near the middle
 
-    if (abs(steer_axis) > STEER_DEADZONE) {
-        // --- Expo Curve for Smoother Steering ---
-        // 1. Normalize the joystick input to a floating-point number from 0.0 to 1.0
-        float normalized_value = map(abs(steer_axis), STEER_DEADZONE, 512, 0, 1000) / 1000.0;
-
-        // 2. Apply an exponential curve (we'll use value^3). 
-        // This is like a CSS "ease-in" function. It makes small stick movements have a much smaller effect,
-        // giving you very fine control near the center for going straight.
-        float expo_value = normalized_value * normalized_value * normalized_value;
-
-        // 3. Scale the smoothed value back up to the full power range (0-255) for maximum torque.
-        int speed = map(expo_value * 1000, 0, 1000, 0, 255);
-
-        // 4. Set a minimum speed. The motor needs a certain amount of power just to start moving.
-        // This prevents the motor from "stuttering" at very low speeds.
-        if (speed > 0 && speed < 80) {
-            speed = 80;
-        }
-
-        if (steer_axis > 0) { // Joystick moved right
-            // Turn Right
-            digitalWrite(TERN_LEFT_PIN, LOW);
-            digitalWrite(TERN_RIGHT_PIN, HIGH);
-        } else { // Joystick moved left
-            // Turn Left
-            digitalWrite(TERN_LEFT_PIN, HIGH);
-            digitalWrite(TERN_RIGHT_PIN, LOW);
-        }
-        ledcWrite(TERN_SPEED_CHANNEL, speed);
-
+    int angle;
+    if (abs(steer_axis) <= STEER_DEADZONE) {
+        angle = STEER_CENTER; // Wheels straight
     } else {
-        // Stop Turning (we are inside the deadzone)
-        digitalWrite(TERN_LEFT_PIN, LOW);
-        digitalWrite(TERN_RIGHT_PIN, LOW);
-        ledcWrite(TERN_SPEED_CHANNEL, 0);
+        // How far past the deadzone, from 0.0 (edge) to 1.0 (full stick).
+        float amount = (float)(abs(steer_axis) - STEER_DEADZONE) / (512 - STEER_DEADZONE);
+        if (amount > 1.0f) amount = 1.0f;
+
+        // Bend the response: soft near center, full at the ends.
+        float shaped = STEER_EXPO * amount * amount * amount + (1 - STEER_EXPO) * amount;
+
+        if (steer_axis > 0) {
+            angle = STEER_CENTER + shaped * (STEER_RIGHT - STEER_CENTER);
+        } else {
+            angle = STEER_CENTER - shaped * (STEER_CENTER - STEER_LEFT);
+        }
     }
+    steerServo.write(angle);
 
 
     // --- Driving (Left Joystick Y-axis) ---

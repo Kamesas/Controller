@@ -1,8 +1,12 @@
 #include <Arduino.h>
 #include <Bluepad32.h>
+#include <ESP32Servo.h>
 #include "ControllerManager.h"
 #include "managers/config.h" // Include all our pin definitions and settings
 #include "managers/GamepadManager.h"
+
+// Steering servo. GamepadManager.cpp writes angles to it.
+Servo steerServo;
 
 // Hardware timer for precise blinking
 hw_timer_t * blinkTimer = NULL;
@@ -29,16 +33,21 @@ void setup() {
     digitalWrite(LEFT_TURN_PIN, LOW);
     digitalWrite(RIGHT_TURN_PIN, LOW);
     
-    // Motors
-    pinMode(TERN_LEFT_PIN, OUTPUT);
-    pinMode(TERN_RIGHT_PIN, OUTPUT);
+    // Drive motor direction pins
     pinMode(DRIVE_FORWARD_PIN, OUTPUT);
     pinMode(DRIVE_BACKWARD_PIN, OUTPUT);
 
-    // --- PWM (LEDC) Setup for ESP32 ---
-    ledcSetup(TERN_SPEED_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
-    ledcAttachPin(TERN_SPEED_PIN, TERN_SPEED_CHANNEL);
+    // --- Steering Servo Setup ---
+    // Reserve LEDC timers 0 and 1 for the servo library, then attach the servo.
+    // 50 Hz is the standard servo update rate. 500-2400 us is the pulse range;
+    // widen or narrow it if your servo does not reach full travel.
+    ESP32PWM::allocateTimer(0);
+    ESP32PWM::allocateTimer(1);
+    steerServo.setPeriodHertz(50);
+    steerServo.attach(STEER_SERVO_PIN, 500, 2400);
+    steerServo.write(STEER_CENTER); // Start with wheels straight
 
+    // --- PWM (LEDC) Setup for the drive motor speed ---
     ledcSetup(DRIVE_SPEED_CHANNEL, PWM_FREQ, PWM_RESOLUTION);
     ledcAttachPin(DRIVE_SPEED_PIN, DRIVE_SPEED_CHANNEL);
 
@@ -51,7 +60,9 @@ void setup() {
 
     // Setup the Bluepad32 callbacks
     BP32.setup(&onConnectedController, &onDisconnectedController);
-    BP32.forgetBluetoothKeys();
+    // Keep paired controllers across reboots so the gamepad reconnects on its
+    // own. Uncomment to wipe all pairings (needed only to bond a different pad).
+    // BP32.forgetBluetoothKeys();
     BP32.enableVirtualDevice(false);
 }
 
