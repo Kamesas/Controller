@@ -174,3 +174,10 @@ void processGamepad(ControllerPtr ctl) {
         ledcWrite(DRIVE_SPEED_CHANNEL, 0);
     }
 }
+
+void stopCar() {
+    digitalWrite(DRIVE_FORWARD_PIN, LOW);
+    digitalWrite(DRIVE_BACKWARD_PIN, LOW);
+    ledcWrite(DRIVE_SPEED_CHANNEL, 0);
+    steerServo.write(STEER_CENTER);
+}

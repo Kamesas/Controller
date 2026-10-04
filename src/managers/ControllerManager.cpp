@@ -1,8 +1,5 @@
 #include "ControllerManager.h"
 #include "GamepadManager.h"
-// #include "KeyboardManager.h"
-// #include "MouseManager.h"
-// #include "BalanceBoardManager.h"
 #include <Arduino.h>
 
 // Global array to hold controller pointers
@@ -32,6 +29,9 @@ void onDisconnectedController(ControllerPtr ctl) {
         if (myControllers[i] == ctl) {
             Serial.printf("CALLBACK: Controller disconnected from index=%d\n", i);
             myControllers[i] = nullptr;
+            // The motor keeps its last speed until told otherwise, so a lost
+            // gamepad would leave the car driving.
+            stopCar();
             foundController = true;
             break;
         }
@@ -46,18 +46,8 @@ void processControllers() {
         if (myController && myController->isConnected() && myController->hasData()) {
             if (myController->isGamepad()) {
                 processGamepad(myController);
-            // } else if (myController->isMouse()) {
-            //     processMouse(myController);
-            // } else if (myController->isKeyboard()) {
-            //     processKeyboard(myController);
-            // } else if (myController->isBalanceBoard()) {
-            //     processBalanceBoard(myController);
             } else {
-                // When other controller types are connected, they will be reported as "Unsupported"
-                // but their specific logic will not be processed.
-                if (!myController->isGamepad()) {
-                    Serial.println("Unsupported controller");
-                }
+                Serial.println("Unsupported controller");
             }
         }
     }

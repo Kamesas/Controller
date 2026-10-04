@@ -1,8 +1,5 @@
 #pragma once
-#include <Bluepad32.h> // It's best to include the main header here
-
-// Forward declaration
-void processGamepad(ControllerPtr ctl);
+#include <Bluepad32.h>
 
 // Callback functions for Bluepad32
 void onConnectedController(ControllerPtr ctl);

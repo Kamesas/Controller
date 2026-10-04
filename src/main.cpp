@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Bluepad32.h>
 #include <ESP32Servo.h>
-#include "ControllerManager.h"
+#include "managers/ControllerManager.h"
 #include "managers/config.h" // Include all our pin definitions and settings
 #include "managers/GamepadManager.h"
 

@@ -10,3 +10,6 @@ void processGamepad(ControllerPtr ctl);
 
 // Function to handle the blinking logic for turn signals
 void handleBlinking();
+
+// Stop the drive motor and center the steering
+void stopCar();
